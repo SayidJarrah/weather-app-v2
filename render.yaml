@@ -1,15 +1,5 @@
 version: "1"
 
-envVarGroups:
-  - name: weather-backend-secrets
-    envVars:
-      - key: DATASOURCE_URL
-        sync: false
-      - key: DATASOURCE_USERNAME
-        sync: false
-      - key: DATASOURCE_PASSWORD
-        sync: false
-
 services:
   - type: web
     name: weather-backend
@@ -21,8 +11,18 @@ services:
     envVars:
       - key: PORT
         value: "8080"
-    envVarGroups:
-      - weather-backend-secrets
+      - key: DATASOURCE_URL
+        fromDatabase:
+          name: weather-app-db
+          property: connectionString
+      - key: DATASOURCE_USERNAME
+        fromDatabase:
+          name: weather-app-db
+          property: user
+      - key: DATASOURCE_PASSWORD
+        fromDatabase:
+          name: weather-app-db
+          property: password
 
   - type: web
     name: weather-frontend
@@ -41,3 +41,9 @@ services:
       - type: rewrite
         source: "/*"
         destination: "/index.html"
+
+databases:
+  - name: weather-app-db
+    plan: starter
+    databaseName: weather_app
+    user: weather_app
