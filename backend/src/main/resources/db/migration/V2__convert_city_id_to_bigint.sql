@@ -1,0 +1,9 @@
+ALTER TABLE city ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE city ALTER COLUMN id TYPE BIGINT;
+
+DROP SEQUENCE IF EXISTS city_id_seq;
+CREATE SEQUENCE city_id_seq AS BIGINT OWNED BY city.id;
+
+ALTER TABLE city ALTER COLUMN id SET DEFAULT nextval('city_id_seq');
+
+SELECT setval('city_id_seq', COALESCE((SELECT MAX(id) FROM city), 0));

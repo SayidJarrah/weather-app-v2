@@ -1,5 +1,6 @@
 package com.example.weatherapp
 
+import com.example.weatherapp.controller.WeatherController
 import com.example.weatherapp.dto.CityWeatherDto
 import com.example.weatherapp.dto.WeatherSnapshot
 import com.example.weatherapp.dto.WeatherStatus
@@ -7,16 +8,19 @@ import com.example.weatherapp.service.WeatherService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
 
-@WebFluxTest
+@WebMvcTest(WeatherController::class)
 class WeatherControllerTest {
 
     @Autowired
-    private lateinit var webTestClient: WebTestClient
+    private lateinit var mockMvc: MockMvc
 
     @MockBean
     private lateinit var weatherService: WeatherService
@@ -37,14 +41,11 @@ class WeatherControllerTest {
         )
         whenever(weatherService.getWeatherSnapshot()).thenReturn(snapshot)
 
-        webTestClient.get()
-            .uri("/api/weather")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .jsonPath("$.generatedAt").isEqualTo("2024-05-01T10:00:00Z")
-            .jsonPath("$.cities[0].cityName").isEqualTo("Kyiv")
-            .jsonPath("$.cities[0].temperatureCelsius").isEqualTo(12.3)
-            .jsonPath("$.cities[0].status").isEqualTo("OK")
+        mockMvc.perform(get("/api/weather"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.generatedAt").value("2024-05-01T10:00:00Z"))
+            .andExpect(jsonPath("$.cities[0].cityName").value("Kyiv"))
+            .andExpect(jsonPath("$.cities[0].temperatureCelsius").value(12.3))
+            .andExpect(jsonPath("$.cities[0].status").value("OK"))
     }
 }
