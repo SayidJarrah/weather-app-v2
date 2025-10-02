@@ -53,6 +53,28 @@ class OpenMeteoClientTest {
     }
 
     @Test
+    fun `parses timestamp without offset as utc`() {
+        val body = """
+            {
+              "current_weather": {
+                "temperature": 18.7,
+                "time": "2024-05-01T12:30"
+              }
+            }
+        """.trimIndent()
+        mockWebServer.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(body)
+        )
+
+        val client = buildClient()
+        val reading = client.fetchCurrentWeather(40.0, 20.0)
+
+        assertEquals(Instant.parse("2024-05-01T12:30:00Z"), reading.observedAt)
+    }
+
+    @Test
     fun `throws descriptive exception on API error`() {
         mockWebServer.enqueue(MockResponse().setResponseCode(500))
 
