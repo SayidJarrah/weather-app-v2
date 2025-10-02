@@ -8,7 +8,10 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeParseException
 
 @Component
 class OpenMeteoClient(
@@ -40,12 +43,25 @@ class OpenMeteoClient(
         val current = responseBody.currentWeather
             ?: throw OpenMeteoException("Missing current weather in response")
 
-        val observedAt = current.time?.toInstant() ?: throw OpenMeteoException("Missing observation timestamp")
+        val observedAt = current.time?.let { toInstant(it) }
+            ?: throw OpenMeteoException("Missing observation timestamp")
 
         return WeatherReading(
             temperatureCelsius = current.temperature,
             observedAt = observedAt
         )
+    }
+
+    private fun toInstant(raw: String): Instant {
+        return try {
+            OffsetDateTime.parse(raw).toInstant()
+        } catch (ignored: DateTimeParseException) {
+            try {
+                LocalDateTime.parse(raw).toInstant(ZoneOffset.UTC)
+            } catch (ex: DateTimeParseException) {
+                throw OpenMeteoException("Unable to parse observation timestamp: $raw", ex)
+            }
+        }
     }
 }
 
@@ -61,7 +77,7 @@ data class OpenMeteoResponse(
 
 data class CurrentWeather(
     val temperature: Double,
-    val time: OffsetDateTime?
+    val time: String?
 )
 
 class OpenMeteoException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
