@@ -22,8 +22,9 @@ services:
           name: weather-app-db
           property: password
 
-  - type: static
-    name: weather-frontend
+staticSites:
+  - name: weather-frontend
+    plan: starter
     rootDir: frontend
     buildCommand: npm ci && npm run build
     publishPath: dist
