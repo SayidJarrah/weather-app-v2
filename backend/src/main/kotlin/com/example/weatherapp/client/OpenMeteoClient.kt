@@ -28,9 +28,10 @@ class OpenMeteoClient(
                     .build()
             }
             .retrieve()
-            .onStatus(HttpStatusCode::isError) { status ->
-                logger.warn("Open-Meteo returned error status {} for lat={}, lon={}", status.value(), latitude, longitude)
-                Mono.error(OpenMeteoException("Open-Meteo error ${status.value()}"))
+            .onStatus(HttpStatusCode::isError) { response ->
+                val statusCode = response.statusCode().value()
+                logger.warn("Open-Meteo returned error status {} for lat={}, lon={}", statusCode, latitude, longitude)
+                Mono.error(OpenMeteoException("Open-Meteo error $statusCode"))
             }
             .bodyToMono(OpenMeteoResponse::class.java)
             .block()
