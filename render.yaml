@@ -24,17 +24,18 @@ services:
           name: weather-app-db
           property: password
 
-staticSites:
-  - name: weather-frontend
+  - type: web
+    name: weather-frontend
+    env: static
     plan: starter
     rootDir: frontend
     buildCommand: npm ci && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_BACKEND_URL
         fromService:
-          type: web
           name: weather-backend
+          type: web
           property: host
     routes:
       - type: rewrite
