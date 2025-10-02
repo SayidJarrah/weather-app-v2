@@ -1,33 +1,33 @@
 version: "1"
 
+envVarGroups:
+  - name: weather-backend-secrets
+    envVars:
+      - key: DATASOURCE_URL
+        sync: false
+      - key: DATASOURCE_USERNAME
+        sync: false
+      - key: DATASOURCE_PASSWORD
+        sync: false
+
 services:
   - type: web
     name: weather-backend
     env: docker
-    plan: starter
+    plan: free
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     healthCheckPath: /actuator/health
     envVars:
       - key: PORT
         value: "8080"
-      - key: DATASOURCE_URL
-        fromDatabase:
-          name: weather-app-db
-          property: connectionString
-      - key: DATASOURCE_USERNAME
-        fromDatabase:
-          name: weather-app-db
-          property: user
-      - key: DATASOURCE_PASSWORD
-        fromDatabase:
-          name: weather-app-db
-          property: password
+    envVarGroups:
+      - weather-backend-secrets
 
   - type: web
     name: weather-frontend
     env: static
-    plan: starter
+    plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
@@ -41,9 +41,3 @@ services:
       - type: rewrite
         source: "/*"
         destination: "/index.html"
-
-databases:
-  - name: weather-app-db
-    plan: starter
-    databaseName: weather_app
-    user: weather_app
