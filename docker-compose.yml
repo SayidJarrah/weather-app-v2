@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15
+    container_name: weather_app_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: weather_app
+      POSTGRES_USER: weather_app
+      POSTGRES_PASSWORD: weather_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:
