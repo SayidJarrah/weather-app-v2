@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ESNext",
     "lib": ["ESNext"],
-    "types": []
+    "types": ["node"]
   },
   "include": ["vite.config.ts"]
 }
