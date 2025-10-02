@@ -2,16 +2,16 @@ version: "1"
 
 databases:
   - name: weather-app-db
-    plan: free                 # was: starter (paid)
+    plan: free
     databaseName: weather_app
     user: weather_app
-    # region: frankfurt        # add if you want a specific region
+    # region: frankfurt
 
 services:
   - type: web
     name: weather-backend
-    runtime: docker            # was: env: docker
-    plan: free
+    runtime: docker
+    plan: starter            # ✅ not "free"
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     healthCheckPath: /actuator/health
@@ -33,7 +33,7 @@ services:
 
   - type: web
     name: weather-frontend
-    runtime: static            # was: env: static
+    runtime: static
     plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
