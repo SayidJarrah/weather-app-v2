@@ -1,11 +1,9 @@
 package com.example.weatherapp.config
 
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.ExchangeStrategies
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
+import org.springframework.web.client.RestTemplate
 import java.time.Clock
 import java.time.Duration
 
@@ -16,19 +14,16 @@ class AppConfig {
     fun clock(): Clock = Clock.systemUTC()
 
     @Bean
-    fun openMeteoWebClient(properties: OpenMeteoProperties): WebClient {
+    fun openMeteoRestTemplate(
+        properties: OpenMeteoProperties,
+        builder: RestTemplateBuilder
+    ): RestTemplate {
         val timeout = Duration.ofSeconds(properties.timeoutSeconds.coerceAtLeast(1))
-        val httpClient = HttpClient.create()
-            .responseTimeout(timeout)
 
-        return WebClient.builder()
-            .baseUrl(properties.baseUrl)
-            .clientConnector(ReactorClientHttpConnector(httpClient))
-            .exchangeStrategies(
-                ExchangeStrategies.builder()
-                    .codecs { config -> config.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
-                    .build()
-            )
+        return builder
+            .rootUri(properties.baseUrl)
+            .setConnectTimeout(timeout)
+            .setReadTimeout(timeout)
             .build()
     }
 }

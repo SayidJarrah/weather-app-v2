@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.boot.web.client.RestTemplateBuilder
 import java.time.Instant
 
 class OpenMeteoClientTest {
@@ -65,9 +65,9 @@ class OpenMeteoClientTest {
 
     private fun buildClient(): OpenMeteoClient {
         val baseUrl = mockWebServer.url("/").toString().removeSuffix("/")
-        val webClient = WebClient.builder()
-            .baseUrl(baseUrl)
+        val restTemplate = RestTemplateBuilder()
+            .rootUri(baseUrl)
             .build()
-        return OpenMeteoClient(webClient)
+        return OpenMeteoClient(restTemplate)
     }
 }
