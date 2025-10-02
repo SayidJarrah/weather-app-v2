@@ -1,9 +1,16 @@
 version: "1"
 
+databases:
+  - name: weather-app-db
+    plan: free                 # was: starter (paid)
+    databaseName: weather_app
+    user: weather_app
+    # region: frankfurt        # add if you want a specific region
+
 services:
   - type: web
     name: weather-backend
-    env: docker
+    runtime: docker            # was: env: docker
     plan: free
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
@@ -26,7 +33,7 @@ services:
 
   - type: web
     name: weather-frontend
-    env: static
+    runtime: static            # was: env: static
     plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
@@ -34,16 +41,10 @@ services:
     envVars:
       - key: VITE_BACKEND_URL
         fromService:
-          name: weather-backend
           type: web
+          name: weather-backend
           property: host
     routes:
       - type: rewrite
         source: "/*"
         destination: "/index.html"
-
-databases:
-  - name: weather-app-db
-    plan: starter
-    databaseName: weather_app
-    user: weather_app
