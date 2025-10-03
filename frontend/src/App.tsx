@@ -182,7 +182,12 @@ const App = () => {
         <label className="dashboard__selector-label" htmlFor="city-select">
           Add city
         </label>
-        <div className="dashboard__selector-controls">
+        <div
+          className="dashboard__selector-controls"
+          role="group"
+          aria-label="City selection"
+          data-testid="city-selector"
+        >
           <select
             id="city-select"
             value={pendingCityId === '' ? '' : pendingCityId}
@@ -201,7 +206,12 @@ const App = () => {
               </option>
             ))}
           </select>
-          <button className="dashboard__add" onClick={handleAddCity} disabled={pendingCityId === ''}>
+          <button
+            className="dashboard__add"
+            onClick={handleAddCity}
+            disabled={pendingCityId === ''}
+            aria-label="Add city to dashboard"
+          >
             Add
           </button>
         </div>
@@ -213,17 +223,25 @@ const App = () => {
         </div>
       )}
 
-      <main className="dashboard__grid">
+      <main className="dashboard__grid" data-testid="dashboard-grid">
         {renderedCities.map((city) => {
           const cardStatus = city.status.toLowerCase();
           const isHealthy = city.status === 'OK';
           return (
-            <article key={city.cityName} className={`weather-card weather-card--${cardStatus}`}>
+            <article
+              key={city.cityId}
+              className={`weather-card weather-card--${cardStatus}`}
+              data-testid={city.status === 'PENDING' ? `city-card-placeholder-${city.cityId}` : `city-card-${city.cityId}`}
+            >
               <header className="weather-card__header">
                 <h2>{city.cityName}</h2>
                 <div className="weather-card__meta">
                   <span className="weather-card__timestamp">Local time: {formatLocalTime(city.timezone)}</span>
-                  <button className="weather-card__remove" onClick={() => handleRemoveCity(city.cityId)}>
+                  <button
+                    className="weather-card__remove"
+                    onClick={() => handleRemoveCity(city.cityId)}
+                    aria-label={`Remove ${city.cityName}`}
+                  >
                     Remove
                   </button>
                 </div>

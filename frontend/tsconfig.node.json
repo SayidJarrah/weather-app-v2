@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "types": ["node", "vitest/importMeta", "vitest/globals"]
+    "types": ["node"]
   },
   "include": ["vite.config.ts"]
 }
