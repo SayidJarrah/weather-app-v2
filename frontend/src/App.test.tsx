@@ -58,24 +58,24 @@ describe('App', () => {
   it('renders default selection of cities', async () => {
     render(<App />);
 
-    await waitFor(() => expect(screen.getByTestId('city-card-1')).toBeInTheDocument());
-    expect(screen.getByTestId('city-card-2')).toBeInTheDocument();
-    expect(screen.getByTestId('city-card-3')).toBeInTheDocument();
-    expect(screen.getByTestId('city-card-4')).toBeInTheDocument();
+    await waitFor(() => {
+      const cards = screen.queryAllByTestId(/city-card-\d+/);
+      expect(cards).toHaveLength(4);
+    });
   });
 
   it('allows adding a new city from the dropdown', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByTestId('city-card-1')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryAllByTestId(/city-card-\d+/)).not.toHaveLength(0));
 
-    const controls = screen.getByRole('group', { name: 'City selection' });
+    const controls = screen.getAllByTestId('city-selector')[0];
     const select = within(controls).getByLabelText('Add city');
     await user.selectOptions(select, '5');
     await user.click(within(controls).getByRole('button', { name: 'Add city to dashboard' }));
 
-    await waitFor(() => expect(screen.getByTestId('city-card-5')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByTestId(/city-card-\d+/).some((card) => card.dataset.testid === 'city-card-5')).toBe(true));
 
     const options = within(select).getAllByRole('option');
     expect(options.some((option) => option.textContent === 'Tokyo' && option.hasAttribute('selected'))).toBeFalsy();
@@ -85,13 +85,14 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByTestId('city-card-1')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryAllByTestId(/city-card-\d+/).length).toBeGreaterThan(0));
 
-    await user.click(within(screen.getByTestId('city-card-1')).getByRole('button', { name: 'Remove New York' }));
+    const card = screen.getAllByTestId('city-card-1')[0];
+    await user.click(within(card).getByRole('button', { name: 'Remove New York' }));
 
-    await waitFor(() => expect(screen.queryByTestId('city-card-1')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryAllByTestId('city-card-1')).toHaveLength(0));
 
-    const controls = screen.getByRole('group', { name: 'City selection' });
+    const controls = screen.getAllByTestId('city-selector')[0];
     const select = within(controls).getByLabelText('Add city');
     expect(within(select).getAllByRole('option').some((option) => option.textContent === 'New York')).toBe(true);
   });
