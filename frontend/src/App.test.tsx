@@ -58,23 +58,23 @@ describe('App', () => {
   it('renders default selection of cities', async () => {
     render(<App />);
 
-    await waitFor(() => expect(screen.getByText('New York')).toBeInTheDocument());
-    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
-    expect(screen.getByText('London')).toBeInTheDocument();
-    expect(screen.getByText('Paris')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'New York' })).toBeInTheDocument());
+    expect(screen.getByRole('heading', { name: 'Los Angeles' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'London' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Paris' })).toBeInTheDocument();
   });
 
   it('allows adding a new city from the dropdown', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByText('New York')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'New York' })).toBeInTheDocument());
 
     const select = screen.getByLabelText('Add city');
     await user.selectOptions(select, '5');
-    await user.click(screen.getByRole('button', { name: 'Add' }));
+    await user.click(screen.getByRole('button', { name: 'Add city to dashboard' }));
 
-    await waitFor(() => expect(screen.getByText('Tokyo')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Tokyo' })).toBeInTheDocument());
 
     const options = within(select).getAllByRole('option');
     expect(options.some((option) => option.textContent === 'Tokyo' && option.hasAttribute('selected'))).toBeFalsy();
@@ -84,11 +84,11 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByText('New York')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'New York' })).toBeInTheDocument());
 
-    await user.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Remove New York' }));
 
-    await waitFor(() => expect(screen.queryByText('New York')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'New York' })).not.toBeInTheDocument());
 
     const select = screen.getByLabelText('Add city');
     expect(within(select).getAllByRole('option').some((option) => option.textContent === 'New York')).toBe(true);

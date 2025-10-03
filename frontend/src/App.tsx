@@ -182,7 +182,7 @@ const App = () => {
         <label className="dashboard__selector-label" htmlFor="city-select">
           Add city
         </label>
-        <div className="dashboard__selector-controls">
+        <div className="dashboard__selector-controls" role="group" aria-label="City selection">
           <select
             id="city-select"
             value={pendingCityId === '' ? '' : pendingCityId}
@@ -201,7 +201,12 @@ const App = () => {
               </option>
             ))}
           </select>
-          <button className="dashboard__add" onClick={handleAddCity} disabled={pendingCityId === ''}>
+          <button
+            className="dashboard__add"
+            onClick={handleAddCity}
+            disabled={pendingCityId === ''}
+            aria-label="Add city to dashboard"
+          >
             Add
           </button>
         </div>
@@ -223,7 +228,11 @@ const App = () => {
                 <h2>{city.cityName}</h2>
                 <div className="weather-card__meta">
                   <span className="weather-card__timestamp">Local time: {formatLocalTime(city.timezone)}</span>
-                  <button className="weather-card__remove" onClick={() => handleRemoveCity(city.cityId)}>
+                  <button
+                    className="weather-card__remove"
+                    onClick={() => handleRemoveCity(city.cityId)}
+                    aria-label={`Remove ${city.cityName}`}
+                  >
                     Remove
                   </button>
                 </div>
