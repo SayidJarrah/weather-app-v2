@@ -117,24 +117,23 @@ const App = () => {
     if (state.data?.cities) {
       return state.data.cities;
     }
-    return selectedCityIds
-      .map((id) => {
-        const meta = availableCities.find((city) => city.id === id);
-        return (
-          meta && (
-            {
-              cityId: meta.id,
-              cityName: meta.name,
-              temperatureCelsius: null,
-              status: 'PENDING' as const,
-              dataTimestamp: null,
-              message: 'Loading…',
-              timezone: meta.timezone
-            } satisfies CityWeather
-          )
-        );
-      })
-      .filter((city): city is CityWeather => Boolean(city));
+
+    return selectedCityIds.reduce<CityWeather[]>((acc, id) => {
+      const meta = availableCities.find((city) => city.id === id);
+      if (!meta) {
+        return acc;
+      }
+      acc.push({
+        cityId: meta.id,
+        cityName: meta.name,
+        temperatureCelsius: null,
+        status: 'PENDING',
+        dataTimestamp: null,
+        message: 'Loading…',
+        timezone: meta.timezone
+      });
+      return acc;
+    }, []);
   }, [state.data?.cities, selectedCityIds, availableCities]);
 
   const selectableCities = useMemo(
