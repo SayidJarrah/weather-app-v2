@@ -14,7 +14,7 @@ services:
     plan: starter            # ✅ not "free"
     image:
       registryCredential: ghcr
-      url: ghcr.io/SayidJarrah/weather-backend:latest
+      url: ghcr.io/sayidjarrah/weather-backend:latest
     healthCheckPath: /actuator/health
     envVars:
       - key: PORT
@@ -38,7 +38,7 @@ services:
     plan: free
     image:
       registryCredential: ghcr
-      url: ghcr.io/SayidJarrah/weather-frontend:latest
+      url: ghcr.io/sayidjarrah/weather-frontend:latest
     routes:
       - type: rewrite
         source: "/*"
