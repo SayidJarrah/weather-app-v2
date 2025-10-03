@@ -182,7 +182,12 @@ const App = () => {
         <label className="dashboard__selector-label" htmlFor="city-select">
           Add city
         </label>
-        <div className="dashboard__selector-controls" role="group" aria-label="City selection">
+        <div
+          className="dashboard__selector-controls"
+          role="group"
+          aria-label="City selection"
+          data-testid="city-selector"
+        >
           <select
             id="city-select"
             value={pendingCityId === '' ? '' : pendingCityId}
@@ -226,7 +231,7 @@ const App = () => {
             <article
               key={city.cityId}
               className={`weather-card weather-card--${cardStatus}`}
-              data-testid={`city-card-${city.cityId}`}
+              data-testid={city.status === 'PENDING' ? `city-card-placeholder-${city.cityId}` : `city-card-${city.cityId}`}
             >
               <header className="weather-card__header">
                 <h2>{city.cityName}</h2>
