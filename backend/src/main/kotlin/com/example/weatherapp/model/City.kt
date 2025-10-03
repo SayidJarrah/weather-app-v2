@@ -21,5 +21,8 @@ data class City(
     val latitude: Double,
 
     @Column(nullable = false)
-    val longitude: Double
+    val longitude: Double,
+
+    @Column(nullable = false)
+    val timezone: String
 )

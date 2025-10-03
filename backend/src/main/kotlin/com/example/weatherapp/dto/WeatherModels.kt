@@ -8,11 +8,13 @@ data class WeatherSnapshot(
 )
 
 data class CityWeatherDto(
+    val cityId: Long,
     val cityName: String,
     val temperatureCelsius: Double?,
     val status: WeatherStatus,
     val dataTimestamp: Instant?,
-    val message: String?
+    val message: String?,
+    val timezone: String
 )
 
 enum class WeatherStatus {
