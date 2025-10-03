@@ -58,9 +58,15 @@ describe('App', () => {
   it('renders default selection of cities', async () => {
     render(<App />);
 
+    const grid = screen.getByTestId('dashboard-grid');
     await waitFor(() => {
-      const cards = screen.queryAllByTestId(/city-card-\d+/);
-      expect(cards).toHaveLength(4);
+      const headings = within(grid).queryAllByRole('heading', { level: 2 });
+      expect(headings.map((node) => node.textContent)).toEqual([
+        'New York',
+        'Los Angeles',
+        'London',
+        'Paris'
+      ]);
     });
   });
 
@@ -68,14 +74,24 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.queryAllByTestId(/city-card-\d+/)).not.toHaveLength(0));
+    const grid = screen.getByTestId('dashboard-grid');
+    await waitFor(() => expect(within(grid).queryAllByRole('heading', { level: 2 })).not.toHaveLength(0));
 
     const controls = screen.getAllByTestId('city-selector')[0];
     const select = within(controls).getByLabelText('Add city');
     await user.selectOptions(select, '5');
     await user.click(within(controls).getByRole('button', { name: 'Add city to dashboard' }));
 
-    await waitFor(() => expect(screen.getAllByTestId(/city-card-\d+/).some((card) => card.dataset.testid === 'city-card-5')).toBe(true));
+    await waitFor(() => {
+      const headings = within(grid).queryAllByRole('heading', { level: 2 });
+      expect(headings.map((node) => node.textContent)).toEqual([
+        'New York',
+        'Los Angeles',
+        'London',
+        'Paris',
+        'Tokyo'
+      ]);
+    });
 
     const options = within(select).getAllByRole('option');
     expect(options.some((option) => option.textContent === 'Tokyo' && option.hasAttribute('selected'))).toBeFalsy();
@@ -85,12 +101,16 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.queryAllByTestId(/city-card-\d+/).length).toBeGreaterThan(0));
+    const grid = screen.getByTestId('dashboard-grid');
+    await waitFor(() => expect(within(grid).queryAllByRole('heading', { level: 2 })).not.toHaveLength(0));
 
-    const card = screen.getAllByTestId('city-card-1')[0];
-    await user.click(within(card).getByRole('button', { name: 'Remove New York' }));
+    const card = within(grid).getByRole('heading', { level: 2, name: 'New York' }).closest('article');
+    expect(card).not.toBeNull();
+    await user.click(within(card as HTMLElement).getByRole('button', { name: 'Remove New York' }));
 
-    await waitFor(() => expect(screen.queryAllByTestId('city-card-1')).toHaveLength(0));
+    await waitFor(() =>
+      expect(within(grid).queryByRole('heading', { level: 2, name: 'New York' })).not.toBeInTheDocument()
+    );
 
     const controls = screen.getAllByTestId('city-selector')[0];
     const select = within(controls).getByLabelText('Add city');
