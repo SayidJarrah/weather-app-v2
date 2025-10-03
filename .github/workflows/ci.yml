@@ -81,7 +81,7 @@ jobs:
         run: |
           cd frontend
           npm run build
-          npm test -- --runInBand
+          npm test
 
   build-and-push:
     needs: [backend-test, frontend-test]
