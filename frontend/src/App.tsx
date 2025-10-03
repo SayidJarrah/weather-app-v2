@@ -27,15 +27,32 @@ const App = () => {
 
   const fetchWeather = useCallback(async () => {
     setState((prev) => ({ ...prev, status: 'loading', error: null }));
+    console.debug('[WeatherDashboard] Fetching weather', {
+      endpoint: WEATHER_ENDPOINT,
+      backendUrl: BACKEND_URL,
+      timestamp: new Date().toISOString()
+    });
     try {
       const response = await fetch(WEATHER_ENDPOINT);
       if (!response.ok) {
+        console.error('[WeatherDashboard] Weather fetch failed', {
+          status: response.status,
+          statusText: response.statusText
+        });
         throw new Error(`Request failed with status ${response.status}`);
       }
       const payload = (await response.json()) as WeatherSnapshot;
+      console.debug('[WeatherDashboard] Weather fetch succeeded', {
+        cityCount: payload.cities.length,
+        generatedAt: payload.generatedAt
+      });
       setState({ status: 'loaded', data: payload, error: null });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[WeatherDashboard] Weather fetch encountered error', {
+        error: errorMessage,
+        endpoint: WEATHER_ENDPOINT
+      });
       setState((prev) => ({ ...prev, status: 'idle', error: errorMessage }));
     }
   }, []);
