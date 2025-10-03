@@ -27,6 +27,8 @@ type FetchState =
   | { status: 'idle' | 'loading'; data: WeatherSnapshot | null; error: string | null }
   | { status: 'loaded'; data: WeatherSnapshot; error: string | null };
 
+type TemperatureBucket = 'cold' | 'mild' | 'warm' | 'hot' | 'unknown';
+
 const rawBackendUrl = (import.meta.env.VITE_BACKEND_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 const WEATHER_ENDPOINT = `${rawBackendUrl}/api/weather`;
 const CITIES_ENDPOINT = `${rawBackendUrl}/api/cities`;
@@ -36,6 +38,12 @@ const App = () => {
   const [availableCities, setAvailableCities] = useState<CityOption[]>([]);
   const [selectedCityIds, setSelectedCityIds] = useState<number[]>([]);
   const [pendingCityId, setPendingCityId] = useState<number | ''>('');
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+  });
 
   const fetchWeather = useCallback(
     async (cityIds: number[]) => {
@@ -106,6 +114,15 @@ const App = () => {
     loadCities();
   }, [fetchWeather, selectedCityIds.length]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('theme-dark');
+    } else {
+      root.classList.remove('theme-dark');
+    }
+  }, [isDarkMode]);
+
   const lastUpdated = useMemo(() => {
     if (state.data?.generatedAt) {
       return formatDateTime(state.data.generatedAt);
@@ -162,17 +179,30 @@ const App = () => {
   return (
     <div className="dashboard">
       <header className="dashboard__header">
-        <div>
-          <h1>Simple Weather Dashboard</h1>
-          <p className="dashboard__subtitle">Current temperatures for Kyiv, Singapore, London, and Sydney.</p>
+        <div className="dashboard__title">
+          <span className="dashboard__logo" role="img" aria-label="Weather globe">
+            🌍
+          </span>
+          <div>
+            <h1>Simple Weather Dashboard</h1>
+            <p className="dashboard__subtitle">Track live weather across your selected cities.</p>
+          </div>
         </div>
         <div className="dashboard__actions">
+          <button
+            className="dashboard__mode-toggle"
+            onClick={() => setIsDarkMode((value) => !value)}
+            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDarkMode ? '🌙 Dark' : '🌞 Light'}
+          </button>
           <button
             className="dashboard__refresh"
             onClick={() => fetchWeather(selectedCityIds)}
             disabled={state.status === 'loading'}
+            aria-label="Refresh weather"
           >
-            {state.status === 'loading' ? 'Refreshing…' : 'Refresh'}
+            {state.status === 'loading' ? <span className="spinner" aria-hidden="true" /> : '🔄'}
           </button>
           {lastUpdated && <span className="dashboard__timestamp">Last updated: {lastUpdated}</span>}
         </div>
@@ -227,14 +257,22 @@ const App = () => {
         {renderedCities.map((city) => {
           const cardStatus = city.status.toLowerCase();
           const isHealthy = city.status === 'OK';
+          const bucket = categorizeTemperature(city.temperatureCelsius);
+          const backgroundStyle = { background: gradientForBucket(bucket) };
           return (
             <article
               key={city.cityId}
               className={`weather-card weather-card--${cardStatus}`}
               data-testid={city.status === 'PENDING' ? `city-card-placeholder-${city.cityId}` : `city-card-${city.cityId}`}
+              style={isHealthy ? backgroundStyle : undefined}
             >
               <header className="weather-card__header">
-                <h2>{city.cityName}</h2>
+                <div className="weather-card__heading">
+                  <h2>{city.cityName}</h2>
+                  <span className="weather-card__icon" aria-hidden="true">
+                    {isHealthy ? iconForBucket(bucket) : '⚠️'}
+                  </span>
+                </div>
                 <div className="weather-card__meta">
                   <span className="weather-card__timestamp">Local time: {formatLocalTime(city.timezone)}</span>
                   <button
@@ -276,6 +314,44 @@ const formatLocalTime = (timezone: string) => {
     timeZone: timezone
   });
   return formatter.format(new Date());
+};
+
+const categorizeTemperature = (temp: number | null): TemperatureBucket => {
+  if (temp === null || Number.isNaN(temp)) return 'unknown';
+  if (temp < 10) return 'cold';
+  if (temp < 20) return 'mild';
+  if (temp < 30) return 'warm';
+  return 'hot';
+};
+
+const gradientForBucket = (bucket: TemperatureBucket) => {
+  switch (bucket) {
+    case 'cold':
+      return 'linear-gradient(135deg, rgba(59,130,246,0.35), rgba(129,140,248,0.55))';
+    case 'mild':
+      return 'linear-gradient(135deg, rgba(16,185,129,0.35), rgba(45,212,191,0.55))';
+    case 'warm':
+      return 'linear-gradient(135deg, rgba(251,191,36,0.45), rgba(252,211,77,0.65))';
+    case 'hot':
+      return 'linear-gradient(135deg, rgba(248,113,113,0.45), rgba(239,68,68,0.65))';
+    default:
+      return 'linear-gradient(135deg, rgba(148,163,184,0.25), rgba(226,232,240,0.45))';
+  }
+};
+
+const iconForBucket = (bucket: TemperatureBucket) => {
+  switch (bucket) {
+    case 'cold':
+      return '❄️';
+    case 'mild':
+      return '🌤️';
+    case 'warm':
+      return '☀️';
+    case 'hot':
+      return '🔥';
+    default:
+      return 'ℹ️';
+  }
 };
 
 export default App;
