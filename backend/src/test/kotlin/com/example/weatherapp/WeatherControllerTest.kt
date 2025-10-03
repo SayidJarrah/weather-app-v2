@@ -31,15 +31,17 @@ class WeatherControllerTest {
             generatedAt = Instant.parse("2024-05-01T10:00:00Z"),
             cities = listOf(
                 CityWeatherDto(
+                    cityId = 1,
                     cityName = "Kyiv",
                     temperatureCelsius = 12.3,
                     status = WeatherStatus.OK,
                     dataTimestamp = Instant.parse("2024-05-01T09:55:00Z"),
-                    message = null
+                    message = null,
+                    timezone = "Europe/Kyiv"
                 )
             )
         )
-        whenever(weatherService.getWeatherSnapshot()).thenReturn(snapshot)
+        whenever(weatherService.getWeatherSnapshot(null)).thenReturn(snapshot)
 
         mockMvc.perform(get("/api/weather"))
             .andExpect(status().isOk)
@@ -47,5 +49,6 @@ class WeatherControllerTest {
             .andExpect(jsonPath("$.cities[0].cityName").value("Kyiv"))
             .andExpect(jsonPath("$.cities[0].temperatureCelsius").value(12.3))
             .andExpect(jsonPath("$.cities[0].status").value("OK"))
+            .andExpect(jsonPath("$.cities[0].timezone").value("Europe/Kyiv"))
     }
 }
