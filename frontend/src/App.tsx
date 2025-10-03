@@ -218,12 +218,16 @@ const App = () => {
         </div>
       )}
 
-      <main className="dashboard__grid">
+      <main className="dashboard__grid" data-testid="dashboard-grid">
         {renderedCities.map((city) => {
           const cardStatus = city.status.toLowerCase();
           const isHealthy = city.status === 'OK';
           return (
-            <article key={city.cityName} className={`weather-card weather-card--${cardStatus}`}>
+            <article
+              key={city.cityId}
+              className={`weather-card weather-card--${cardStatus}`}
+              data-testid={`city-card-${city.cityId}`}
+            >
               <header className="weather-card__header">
                 <h2>{city.cityName}</h2>
                 <div className="weather-card__meta">
